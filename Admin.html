@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 500px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        button {
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Admin Management</h2>
+    <table id="userTable">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Balance</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <h3>Edit User Balance</h3>
+    <p>Username: <span id="editUsername"></span></p>
+    <input type="number" id="editBalance" placeholder="Enter new balance" />
+    <button onclick="saveBalance()">Save Balance</button>
+</div>
+
+<script>
+    let users = JSON.parse(localStorage.getItem('users')) || {};
+    let editUser = null;
+
+    function loadUsers() {
+        const userTableBody = document.querySelector("#userTable tbody");
+        userTableBody.innerHTML = ""; // Clear table first
+
+        Object.keys(users).forEach(username => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${username}</td>
+                <td>$${users[username].money}</td>
+                <td><button onclick="editUserBalance('${username}')">Edit</button></td>
+                <td><button onclick="deleteUser('${username}')">Delete</button></td>
+            `;
+            userTableBody.appendChild(tr);
+        });
+    }
+
+    function editUserBalance(username) {
+        editUser = username;
+        document.getElementById('editUsername').innerText = username;
+        document.getElementById('editBalance').value = users[username].money;
+    }
+
+    function saveBalance() {
+        const newBalance = parseInt(document.getElementById('editBalance').value);
+        if (isNaN(newBalance) || newBalance < 0) return alert("Enter a valid balance!");
+
+        users[editUser].money = newBalance;
+        localStorage.setItem('users', JSON.stringify(users));
+        loadUsers(); // Refresh table
+        alert("Balance updated!");
+    }
+
+    function deleteUser(username) {
+        if (confirm(`Are you sure you want to delete ${username}?`)) {
+            delete users[username];
+            localStorage.setItem('users', JSON.stringify(users));
+            loadUsers(); // Refresh table
+        }
+    }
+
+    loadUsers(); // Load users on page load
+</script>
+
+</body>
